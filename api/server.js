@@ -10,11 +10,15 @@ const PORT = process.env.PORT || 3000;
 const dbDir = 'api/databases';
 const dbConnections = {};
 
+// Check if SSL certificates exist
+const useHttps = fs.existsSync('api/ssl/key.pem') && fs.existsSync('api/ssl/cert.pem');
+
 // Function to check website status
 async function checkWebsiteStatus(domain) {
     try {
         const startTime = Date.now();
-        const response = await axios.get(`http://${domain}`, { timeout: 5000 });
+        const protocol = useHttps ? 'https' : 'http';
+        const response = await axios.get(`${protocol}://${domain}`, { timeout: 5000 });
         const endTime = Date.now();
         const ping = endTime - startTime;
 
@@ -168,22 +172,34 @@ websites.forEach(website => {
 });
 
 // Start server and periodic website status check
-app.listen(PORT, () => {
-    logInfo(`Server is running on http://localhost:${PORT}`);
+if (useHttps) {
+    const https = require('https');
+    const privateKey = fs.readFileSync('api/ssl/key.pem', 'utf8');
+    const certificate = fs.readFileSync('api/ssl/cert.pem', 'utf8');
+    const credentials = { key: privateKey, cert: certificate };
 
-    // Initial website status check
-    processWebsites().then(() => {
-        logInfo('Initial website status check completed.');
-    }).catch((error) => {
-        logError('Initial website status check failed', error);
+    const httpsServer = https.createServer(credentials, app);
+    httpsServer.listen(PORT, () => {
+        logInfo(`Server is running on HTTPS port ${PORT}`);
     });
+} else {
+    app.listen(PORT, () => {
+        logInfo(`Server is running on HTTP port ${PORT}`);
+    });
+}
 
-    // Periodic website status check (every minute)
-    setInterval(() => {
-        processWebsites().then(() => {
-            logInfo('Periodic website status check completed.');
-        }).catch((error) => {
-            logError('Periodic website status check failed', error);
-        });
-    }, 60000);
+// Initial website status check
+processWebsites().then(() => {
+    logInfo('Initial website status check completed.');
+}).catch((error) => {
+    logError('Initial website status check failed', error);
 });
+
+// Periodic website status check (every minute)
+setInterval(() => {
+    processWebsites().then(() => {
+        logInfo('Periodic website status check completed.');
+    }).catch((error) => {
+        logError('Periodic website status check failed', error);
+    });
+}, 60000);
