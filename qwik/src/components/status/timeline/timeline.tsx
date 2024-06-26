@@ -12,7 +12,7 @@ interface PingData {
 
 export const usePingData = routeLoader$(async () => {
   try {
-    const response = await fetch(`https://${config.apidomain}/eraold`, {
+    const response = await fetch(`https://${config.apidomain}/google`, {
       headers: { Accept: 'application/json' },
     });
 
