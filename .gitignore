@@ -1,0 +1,4 @@
+#Main
+node_modules
+.vscode
+.env

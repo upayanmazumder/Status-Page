@@ -1,0 +1,27 @@
+{
+  "name": "status-page",
+  "version": "1.0.0",
+  "description": "A status page to monitor websites and more!",
+  "main": "api/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "api": "node api/server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/upayanmazumder/Status-Page.git"
+  },
+  "keywords": [
+    "status-page",
+    "website",
+    "status",
+    "qwik",
+    "api"
+  ],
+  "author": "upayanmazumder",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/upayanmazumder/Status-Page/issues"
+  },
+  "homepage": "https://github.com/upayanmazumder/Status-Page#readme"
+}

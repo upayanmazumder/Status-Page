@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "name": "Status Page",
+  "short_name": "Status Page",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#fff",
+  "description": "Status page"
+}

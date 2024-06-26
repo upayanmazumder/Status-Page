@@ -1,0 +1,29 @@
+footer {
+  text-align: center;
+  padding-top: 15px;
+  padding-bottom: 30px;
+}
+
+.anchor {
+  color: white !important;
+  display: block;
+  font-size: 0.8rem;
+  text-align: center;
+  text-decoration: none;
+  line-height: 1.5;
+}
+
+.anchor span:not(.spacer) {
+  display: block;
+}
+
+.version {
+  font-size: smaller;
+  color: rgb(148, 148, 148);
+}
+
+@media screen and (min-width: 768px) {
+  .anchor span {
+    display: inline !important;
+  }
+}

@@ -1,0 +1,22 @@
+.section {
+    margin: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+  }
+  
+  .heading {
+    font-size: 1.5rem;
+    color: #333;
+  }
+  
+  .routeList {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .routeItem {
+    margin-bottom: 8px;
+    font-size: 1.2rem;
+    color: #555;
+  }
+  

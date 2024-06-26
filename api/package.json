@@ -1,0 +1,33 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "The API for the status page",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/upayanmazumder/Status-Page.git"
+  },
+  "keywords": [
+    "status-page",
+    "website",
+    "api"
+  ],
+  "author": "upayanmazumder",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/upayanmazumder/Status-Page/issues"
+  },
+  "homepage": "https://github.com/upayanmazumder/Status-Page#readme",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "path": "^0.12.7",
+    "sqlite3": "^5.1.7",
+    "winston": "^3.13.0"
+  }
+}

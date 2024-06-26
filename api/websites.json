@@ -1,0 +1,26 @@
+[
+  {
+    "domain": "example.com",
+    "shortName": "example",
+    "longName": "Example Website",
+    "description": "This is an example website for testing purposes."
+  },
+  {
+    "domain": "google.com",
+    "shortName": "google",
+    "longName": "Google Search",
+    "description": "Popular search engine and technology company."
+  },
+  {
+    "domain": "github.com",
+    "shortName": "github",
+    "longName": "GitHub",
+    "description": "Platform for hosting and collaborating on code."
+  },
+  {
+    "domain": "eranodes.xyz",
+    "shortName": "eraold",
+    "longName": "EraNodes Discontinued",
+    "description": "The discontinued EraNodes website"
+  }
+]
