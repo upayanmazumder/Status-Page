@@ -1,6 +1,7 @@
 /* eslint-disable qwik/loader-location */
 import { component$ } from '@builder.io/qwik';
 import { routeLoader$ } from '@builder.io/qwik-city';
+import config from '../../../data/config.json';
 
 interface PingData {
   Timestamp: string;
@@ -10,7 +11,7 @@ interface PingData {
 
 export const usePingData = routeLoader$(async () => {
   try {
-    const response = await fetch('http://localhost:13556/github', {
+    const response = await fetch(`https://${config.apidomain}/github`, {
       headers: { Accept: 'application/json' },
     });
 
@@ -22,7 +23,7 @@ export const usePingData = routeLoader$(async () => {
     return responseData.data as PingData[];
   } catch (error) {
     console.error('Error fetching GitHub ping data:', error);
-    return []; // Return an empty array or handle error as per your application's requirements
+    return [];
   }
 });
 
