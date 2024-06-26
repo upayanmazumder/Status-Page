@@ -5,6 +5,8 @@ const fs = require('fs');
 const path = require('path');
 const { logInfo, logWarning, logError } = require('./logger');
 
+require('dotenv').config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const dbDir = 'api/databases';
