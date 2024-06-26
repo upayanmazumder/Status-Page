@@ -70,7 +70,7 @@ export default component$(() => {
     <div class="container container-center">
       <div class={styles.section}>
         <p class={styles.heading}>Google Status</p>
-        <div class={`${styles.barContainer} container container-center`}>
+        <div class={styles.barContainer}>
           {barColors.map((color, index) => (
             <div
               key={index}
