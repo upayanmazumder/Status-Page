@@ -18,17 +18,29 @@
 
 .barContainer {
   display: flex;
+  flex-direction: row-reverse;
   justify-content: center;
   align-items: center;
   padding: 10px 30px;
   width: fit-content;
-  max-width: fit-content;
-  flex-direction: row-reverse;
+  max-width: 100%;
 }
-
 
 .bar {
-  width: 6px;
   height: 40px;
   margin: 0 2px;
+  width: 6px;
 }
+
+@media (max-width: 768px) {
+  .bar {
+    width: 3px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .bar {
+    width: 4px;
+  }
+}
+

@@ -10,12 +10,12 @@ header {
   backdrop-filter: blur(20px);
 }
 
-a {
+header a {
   color: #9dc9e3 !important;
   transition: color 0.2s ease;
 }
 
-a:hover {
+header a:hover {
   color: #3fa5df !important;
   text-decoration: none;
 }
