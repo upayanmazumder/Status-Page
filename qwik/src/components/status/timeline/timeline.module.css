@@ -5,10 +5,13 @@
   align-items: center;
   padding: 10px 15px 20px;
   height: fit-content;
+  margin-bottom: 10px;
+  width: 100%;
 }
 
 .heading {
-  font-size: 36px;
+  font-size: 26px;
+  font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   text-align: center;
   margin: 5px 0;
 }

@@ -10,9 +10,13 @@ interface PingData {
   Ping: number;
 }
 
-export const usePingData = routeLoader$(async () => {
+// Define endpoints to fetch data from
+const endpoints = ['Google', 'Eraold', 'Github', 'Example'];
+
+// Fetch data for each endpoint
+const fetchDataForEndpoint = async (endpoint: string): Promise<PingData[]> => {
   try {
-    const response = await fetch(`https://${config.apidomain}/google`, {
+    const response = await fetch(`https://${config.apidomain}/${endpoint.toLowerCase()}`, {
       headers: { Accept: 'application/json' },
     });
 
@@ -23,13 +27,26 @@ export const usePingData = routeLoader$(async () => {
     const responseData = await response.json();
     return responseData.data as PingData[];
   } catch (error) {
-    console.error('Error fetching Google ping data:', error);
+    console.error(`Error fetching ${endpoint} ping data:`, error);
     return []; // Return empty array on error
   }
+};
+
+// Route loader to fetch data for all endpoints
+export const usePingData = routeLoader$(async () => {
+  const allPingData: Record<string, PingData[]> = {};
+
+  // Fetch data for each endpoint sequentially
+  for (const endpoint of endpoints) {
+    const data = await fetchDataForEndpoint(endpoint.toLowerCase());
+    allPingData[endpoint] = data;
+  }
+
+  return allPingData;
 });
 
 export default component$(() => {
-  const pingData = usePingData();
+  const allPingData = usePingData();
 
   // Function to calculate offline status for each day
   const calculateOfflineStatus = (pingData: PingData[], days: number): ('orange' | 'green' | 'grey')[] => {
@@ -64,22 +81,28 @@ export default component$(() => {
   };
 
   const daysToShow = 90; // Number of days to show bars for
-  const barColors = calculateOfflineStatus(pingData.value, daysToShow);
 
   return (
     <div class="container container-center">
-      <div class={styles.section}>
-        <p class={styles.heading}>Google Status</p>
-        <div class={styles.barContainer}>
-          {barColors.map((color, index) => (
-            <div
-              key={index}
-              class={styles.bar}
-              style={{ backgroundColor: color === 'grey' ? '#ccc' : color }}
-            />
-          ))}
-        </div>
-      </div>
+      {endpoints.map((endpoint, index) => {
+        const pingData = allPingData.value?.[endpoint] || [];
+        const barColors = calculateOfflineStatus(pingData, daysToShow);
+
+        return (
+          <div key={index} class={styles.section}>
+            <p class={styles.heading}>{endpoint} Status</p>
+            <div class={styles.barContainer}>
+              {barColors.map((color, idx) => (
+                <div
+                  key={idx}
+                  class={styles.bar}
+                  style={{ backgroundColor: color === 'grey' ? '#ccc' : color }}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 });

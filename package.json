@@ -5,7 +5,8 @@
   "main": "api/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "api": "node api/server"
+    "api": "node api/server",
+    "dev": "cd qwik && npm run dev"
   },
   "repository": {
     "type": "git",
