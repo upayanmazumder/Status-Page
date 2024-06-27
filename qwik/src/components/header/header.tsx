@@ -1,41 +1,25 @@
 import { component$ } from "@builder.io/qwik";
-import Icon from "../../media/icon.png?jsx";
+import QwikLogo from "../../media/icon.png?jsx";
+import { BsGithub, BsCodeSlash } from "@qwikest/icons/bootstrap";
+import config from '../../data/config.json';
 import styles from "./header.module.css";
 
 export default component$(() => {
+  const apiLink = `https://${config.apidomain}`;
   return (
     <header class={styles.header}>
-      <div class={["container", styles.wrapper]}>
-        <div class={styles.logo}>
-            <Icon/>
-        </div>
-        <ul>
-          <li>
-            <a
-              href="https://qwik.dev/docs/components/overview/"
-              target="_blank"
-            >
-              Docs
-            </a>
-          </li>
-          <li>
-            <a
-              href="https://qwik.dev/examples/introduction/hello-world/"
-              target="_blank"
-            >
-              Examples
-            </a>
-          </li>
-          <li>
-            <a
-              href="https://qwik.dev/tutorial/welcome/overview/"
-              target="_blank"
-            >
-              Tutorials
-            </a>
-          </li>
-        </ul>
+      <div class={styles.logo}>
+        <QwikLogo />
       </div>
+      <h1><a href="https://upayan.space" target="_blank">Status Page</a></h1>
+      <ul>
+        <li>
+          <a href="https://github.com/upayanmazumder/Status-Page" target="_blank"><BsGithub/> Repository</a>
+        </li>
+        <li>
+          <a href={apiLink} target="_blank"><BsCodeSlash/> Api</a>
+        </li>
+      </ul>
     </header>
   );
 });
