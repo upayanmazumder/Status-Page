@@ -1,0 +1,10 @@
+# TODO
+
+## API
+
+- [ ] Do not make records in case of `AggregateError`
+
+## QWIK
+
+- [ ] Responsive layout for smaller devices
+- [ ] Implement loaders for sections
