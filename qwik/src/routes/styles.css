@@ -173,6 +173,17 @@ button.button-small {
   );
   transform: rotate(-5deg);
 }
+.ellipsis.ellipsis-404 {
+  top: 80px;
+  left: 40px;
+  height: 500px;
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    #941c32,
+    rgba(21, 25, 52, 0) 100%
+  );
+  transform: rotate(-5deg);
+}
 
 @media screen and (min-width: 768px) {
   .ellipsis {
