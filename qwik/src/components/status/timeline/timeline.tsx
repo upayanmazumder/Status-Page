@@ -55,11 +55,19 @@ export default component$(() => {
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
 
+    // Filter pingData to include only records within the last 'days' days
+    const filteredPingData = pingData.filter(ping => {
+      const pingDate = new Date(ping.Timestamp);
+      pingDate.setHours(0, 0, 0, 0);
+      const differenceInDays = Math.ceil((currentDate.getTime() - pingDate.getTime()) / (1000 * 3600 * 24));
+      return differenceInDays <= days;
+    });
+
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(currentDate);
       date.setDate(date.getDate() - i);
 
-      const dataForDate = pingData.filter(ping => {
+      const dataForDate = filteredPingData.filter(ping => {
         const pingDate = new Date(ping.Timestamp);
         pingDate.setHours(0, 0, 0, 0);
         return pingDate.getTime() === date.getTime();
@@ -115,7 +123,7 @@ export default component$(() => {
     return offlineStatus;
   };
 
-  const daysToShow = 90; // Number of days to show bars for
+  const daysToShow = 90; // Number of days to show the bars for
 
   return (
     <div class="container container-center">
