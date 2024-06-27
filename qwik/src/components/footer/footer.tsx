@@ -8,10 +8,12 @@ export const Footer = component$(() => {
 
   return (
     <footer class={styles.footer}>
-      <a class={styles.anchor}>
+      <p class={styles.anchor}>
         <span>&copy; Status Page {new Date().getFullYear()}</span>
-      </a>
-      <p class={styles.version}>v{store.version}</p>
+      </p>
+      <p class={styles.version}>
+        Version {store.version}
+      </p>
     </footer>
   );
 });
