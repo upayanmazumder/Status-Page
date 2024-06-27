@@ -21,6 +21,22 @@
   margin: 5px 0;
 }
 
+.domain {
+  color: #14afd2;
+  font-size: smaller;
+  transition: color 0.2s ease;
+}
+
+.domain:hover {
+  color: rgb(119, 215, 237);
+}
+
+.description {
+  font-size: small;
+  color: #a8a8a8f1;
+  margin: 5px 0;
+}
+
 .barContainer {
   display: flex;
   flex-direction: row-reverse;

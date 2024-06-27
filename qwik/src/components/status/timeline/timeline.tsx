@@ -10,6 +10,13 @@ interface PingData {
   Ping: number;
 }
 
+interface EndpointDetails {
+  shortName: string;
+  domain: string;
+  longName: string;
+  description: string;
+}
+
 // Fetch available routes from the API
 const fetchAvailableRoutes = async (): Promise<string[]> => {
   try {
@@ -29,21 +36,8 @@ const fetchAvailableRoutes = async (): Promise<string[]> => {
   }
 };
 
-// Route loader to fetch data for all available routes
-export const usePingData = routeLoader$(async () => {
-  const availableRoutes = await fetchAvailableRoutes();
-  const allPingData: Record<string, PingData[]> = {};
-
-  // Fetch data for each available route sequentially
-  for (const route of availableRoutes) {
-    const data = await fetchDataForEndpoint(route.toLowerCase());
-    allPingData[route] = data;
-  }
-
-  return allPingData;
-});
-
-const fetchDataForEndpoint = async (endpoint: string): Promise<PingData[]> => {
+// Fetch data for an endpoint including ping data and details
+const fetchDataForEndpoint = async (endpoint: string): Promise<{ pingData: PingData[], details: EndpointDetails }> => {
   try {
     const response = await fetch(`https://${config.apidomain}${endpoint}`, {
       headers: { Accept: 'application/json' },
@@ -54,20 +48,38 @@ const fetchDataForEndpoint = async (endpoint: string): Promise<PingData[]> => {
     }
 
     const responseData = await response.json();
-    return responseData.data as PingData[];
+    const { shortName, domain, longName, description, data } = responseData;
+
+    return {
+      pingData: data as PingData[],
+      details: { shortName, domain, longName, description }
+    };
   } catch (error) {
-    console.error(`Error fetching ${endpoint} ping data:`, error);
-    return [];
+    console.error(`Error fetching ${endpoint} data:`, error);
+    return { pingData: [], details: {} as EndpointDetails };
   }
 };
 
+// Route loader to fetch data for all available routes
+export const usePingData = routeLoader$<Record<string, { pingData: PingData[], details: EndpointDetails }>>(async () => {
+  const availableRoutes = await fetchAvailableRoutes();
+  const allData: Record<string, { pingData: PingData[], details: EndpointDetails }> = {};
+
+  // Fetch data for each available route sequentially
+  for (const route of availableRoutes) {
+    const { pingData, details } = await fetchDataForEndpoint(route.toLowerCase());
+    allData[route] = { pingData, details };
+  }
+
+  return allData;
+});
+
 export default component$(() => {
-  const allPingData = usePingData();
+  const allData = usePingData();
   
   // Function to calculate offline status and uptime percentage for each day
   const calculateOfflineStatus = (pingData: PingData[], days: number): { color: 'orange' | 'green' | 'grey'; date: string; offlineTimes: string[]; uptimePercentage: number }[] => {
     const offlineStatus: { color: 'orange' | 'green' | 'grey'; date: string; offlineTimes: string[]; uptimePercentage: number }[] = [];
-
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
 
@@ -143,13 +155,15 @@ export default component$(() => {
 
   return (
     <div class="container container-center">
-      {Object.keys(allPingData.value).map((endpoint, index) => {
-        const pingData = allPingData.value[endpoint];
+      {Object.keys(allData.value).map((endpoint, index) => {
+        const { pingData, details } = allData.value[endpoint];
         const barData = calculateOfflineStatus(pingData, daysToShow);
 
         return (
           <div key={index} class={styles.section}>
-            <p class={styles.heading}>{endpoint.slice(1).charAt(0).toUpperCase() + endpoint.slice(2)} Status</p>
+            <p class={styles.heading}>{details.longName}</p>
+            <a class={styles.domain} href={`https://${details.domain}`} target="_blank">{details.domain}</a>
+            <p class={styles.description}>{details.description}</p>
             <div class={styles.wrapper}>
               <div class={styles.barContainer}>
                 {barData.map((bar, idx) => (
