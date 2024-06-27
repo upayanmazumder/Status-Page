@@ -9,7 +9,7 @@ export const Footer = component$(() => {
   return (
     <footer class={styles.footer}>
       <p class={styles.anchor}>
-        <span>&copy; Status Page {new Date().getFullYear()}</span>
+        <span>&copy; {new Date().getFullYear()} Upayan. All rights reserved</span>
       </p>
       <p class={styles.version}>
         Version {store.version}
