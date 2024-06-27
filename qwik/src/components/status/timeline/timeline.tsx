@@ -48,9 +48,9 @@ export const usePingData = routeLoader$(async () => {
 export default component$(() => {
   const allPingData = usePingData();
 
-  // Function to calculate offline status for each day
-  const calculateOfflineStatus = (pingData: PingData[], days: number): { color: 'orange' | 'green' | 'grey'; date: string; offlineTimes: string[] }[] => {
-    const offlineStatus: { color: 'orange' | 'green' | 'grey'; date: string; offlineTimes: string[] }[] = [];
+  // Function to calculate offline status and uptime percentage for each day
+  const calculateOfflineStatus = (pingData: PingData[], days: number): { color: 'orange' | 'green' | 'grey'; date: string; offlineTimes: string[]; uptimePercentage: number }[] => {
+    const offlineStatus: { color: 'orange' | 'green' | 'grey'; date: string; offlineTimes: string[]; uptimePercentage: number }[] = [];
 
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
@@ -69,7 +69,7 @@ export default component$(() => {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
-      }).format(date); 
+      }).format(date);
 
       const offlineIntervals: string[] = [];
       let start: string | null = null;
@@ -97,12 +97,18 @@ export default component$(() => {
         }
       });
 
+      let uptimePercentage = 100;
+      if (dataForDate.length > 0) {
+        const onlineCount = dataForDate.filter(ping => ping.Status === 'online').length;
+        uptimePercentage = Math.round((onlineCount / dataForDate.length) * 100);
+      }
+
       if (offlineIntervals.length > 0) {
-        offlineStatus.unshift({ color: 'orange', date: formattedDate, offlineTimes: offlineIntervals }); // Color code when data is available
+        offlineStatus.unshift({ color: 'orange', date: formattedDate, offlineTimes: offlineIntervals, uptimePercentage });
       } else if (dataForDate.length > 0) {
-        offlineStatus.unshift({ color: 'green', date: formattedDate, offlineTimes: [] });
+        offlineStatus.unshift({ color: 'green', date: formattedDate, offlineTimes: [], uptimePercentage });
       } else {
-        offlineStatus.unshift({ color: 'grey', date: formattedDate, offlineTimes: [] }); // Grey for days with no data available
+        offlineStatus.unshift({ color: 'grey', date: formattedDate, offlineTimes: [], uptimePercentage });
       }
     }
 
@@ -115,23 +121,23 @@ export default component$(() => {
     <div class="container container-center">
       {endpoints.map((endpoint, index) => {
         const pingData = allPingData.value[endpoint];
-        const barColors = calculateOfflineStatus(pingData, daysToShow);
+        const barData = calculateOfflineStatus(pingData, daysToShow);
 
         return (
           <div key={index} class={styles.section}>
             <p class={styles.heading}>{endpoint} Status</p>
             <div class={styles.wrapper}>
               <div class={styles.barContainer}>
-                {barColors.map((bar, idx) => (
+                {barData.map((bar, idx) => (
                   <div
                     key={idx}
                     class={styles.bar}
                     title=""
-                    data-tooltip={bar.color === 'orange' 
-                            ? `${bar.date}\nOffline times:\n${bar.offlineTimes.join('\n')}`
-                            : bar.color === 'grey'
-                            ? `${bar.date}\nNo data available`
-                            : `${bar.date}\nNo downtime on this day`}
+                    data-tooltip={bar.color === 'orange'
+                      ? `${bar.date}\nOffline times:\n${bar.offlineTimes.join('\n')}`
+                      : bar.color === 'grey'
+                        ? `${bar.date}\nNo data available`
+                        : `${bar.date}\nNo downtime on this day`}
                     style={{ backgroundColor: bar.color === 'grey' ? '#ccc' : bar.color }}
                   />
                 ))}
@@ -139,7 +145,7 @@ export default component$(() => {
               <div class={styles.footnote}>
                 <p>90 days ago</p>
                 <div class={styles.line}></div>
-                <p>Status</p>
+                <p>{barData[0]?.uptimePercentage}% uptime</p>
                 <div class={styles.line}></div>
                 <p>Today</p>
               </div>
