@@ -49,8 +49,8 @@ export default component$(() => {
   const allPingData = usePingData();
 
   // Function to calculate offline status for each day
-  const calculateOfflineStatus = (pingData: PingData[], days: number): ('orange' | 'green' | 'grey')[] => {
-    const offlineStatus: ('orange' | 'green' | 'grey')[] = [];
+  const calculateOfflineStatus = (pingData: PingData[], days: number): { color: 'orange' | 'green' | 'grey'; date: string; offlineTimes: string[] }[] => {
+    const offlineStatus: { color: 'orange' | 'green' | 'grey'; date: string; offlineTimes: string[] }[] = [];
 
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
@@ -59,17 +59,50 @@ export default component$(() => {
       const date = new Date(currentDate);
       date.setDate(date.getDate() - i);
 
-      const dataForDate = pingData.find(ping => {
+      const dataForDate = pingData.filter(ping => {
         const pingDate = new Date(ping.Timestamp);
         pingDate.setHours(0, 0, 0, 0);
         return pingDate.getTime() === date.getTime();
       });
 
-      if (dataForDate) {
-        const hasOffline = dataForDate.Status !== 'online';
-        offlineStatus.unshift(hasOffline ? 'orange' : 'green'); // Color code when data is available
+      const formattedDate = new Intl.DateTimeFormat(undefined, {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(date); 
+
+      const offlineIntervals: string[] = [];
+      let start: string | null = null;
+      let end = null;
+
+      dataForDate.forEach((data, index) => {
+        if (data.Status !== 'online') {
+          const time = new Date(data.Timestamp).toLocaleTimeString(undefined, {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          });
+          if (start === null) {
+            start = time;
+            end = time;
+          } else {
+            end = time;
+          }
+          // If it's the last data point or the next data point is online, push the interval
+          if (index === dataForDate.length - 1 || dataForDate[index + 1].Status === 'online') {
+            offlineIntervals.push(`${end}-${start}`);
+            start = null;
+            end = null;
+          }
+        }
+      });
+
+      if (offlineIntervals.length > 0) {
+        offlineStatus.unshift({ color: 'orange', date: formattedDate, offlineTimes: offlineIntervals }); // Color code when data is available
+      } else if (dataForDate.length > 0) {
+        offlineStatus.unshift({ color: 'green', date: formattedDate, offlineTimes: [] });
       } else {
-        offlineStatus.unshift('grey'); // Grey for days with no data available
+        offlineStatus.unshift({ color: 'grey', date: formattedDate, offlineTimes: [] }); // Grey for days with no data available
       }
     }
 
@@ -89,11 +122,17 @@ export default component$(() => {
             <p class={styles.heading}>{endpoint} Status</p>
             <div class={styles.wrapper}>
               <div class={styles.barContainer}>
-                {barColors.map((color, idx) => (
+                {barColors.map((bar, idx) => (
                   <div
                     key={idx}
                     class={styles.bar}
-                    style={{ backgroundColor: color === 'grey' ? '#ccc' : color }}
+                    title=""
+                    data-tooltip={bar.color === 'orange' 
+                            ? `${bar.date}\nOffline times:\n${bar.offlineTimes.join('\n')}`
+                            : bar.color === 'grey'
+                            ? `${bar.date}\nNo data available`
+                            : `${bar.date}\nNo downtime on this day`}
+                    style={{ backgroundColor: bar.color === 'grey' ? '#ccc' : bar.color }}
                   />
                 ))}
               </div>
