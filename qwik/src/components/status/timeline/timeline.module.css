@@ -9,6 +9,11 @@
   width: 100%;
 }
 
+.wrapper {
+  text-align: center;
+  vertical-align: middle;
+}
+
 .heading {
   font-size: 26px;
   font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
@@ -24,6 +29,34 @@
   padding: 10px 30px;
   width: fit-content;
   max-width: 100%;
+}
+
+.footnote {
+  padding: 0px 30px;
+  margin: 0px 5px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: fill;
+  max-width: 100%;
+}
+
+.footnote p {
+  word-wrap: normal;
+  text-wrap: nowrap;
+  color: #606060;
+  margin: 0;
+  font-size: smaller;
+}
+
+.line {
+  background-color: #606060a1;
+  min-width: 100px;
+  width: 100%;
+  height: 1px;
+  padding: 0 15px;
+  margin: 0 10px;
 }
 
 .bar {

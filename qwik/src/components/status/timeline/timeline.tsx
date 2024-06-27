@@ -28,7 +28,7 @@ const fetchDataForEndpoint = async (endpoint: string): Promise<PingData[]> => {
     return responseData.data as PingData[];
   } catch (error) {
     console.error(`Error fetching ${endpoint} ping data:`, error);
-    return []; // Return empty array on error
+    return [];
   }
 };
 
@@ -52,32 +52,28 @@ export default component$(() => {
   const calculateOfflineStatus = (pingData: PingData[], days: number): ('orange' | 'green' | 'grey')[] => {
     const offlineStatus: ('orange' | 'green' | 'grey')[] = [];
 
-    // Get the current date
     const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0); // Set to beginning of the day
+    currentDate.setHours(0, 0, 0, 0);
 
-    // Iterate over last 'days' days
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(currentDate);
-      date.setDate(date.getDate() - i); // Calculate the date for this iteration
+      date.setDate(date.getDate() - i);
 
-      // Find the matching data for this date
       const dataForDate = pingData.find(ping => {
         const pingDate = new Date(ping.Timestamp);
-        pingDate.setHours(0, 0, 0, 0); // Set to beginning of the day
+        pingDate.setHours(0, 0, 0, 0);
         return pingDate.getTime() === date.getTime();
       });
 
       if (dataForDate) {
-        // Check if there are offline events on this date
-        const hasOffline = dataForDate.Status !== 'online'; // Adjust according to your 'Status' field
-        offlineStatus.unshift(hasOffline ? 'orange' : 'green'); // Insert at the beginning
+        const hasOffline = dataForDate.Status !== 'online';
+        offlineStatus.unshift(hasOffline ? 'orange' : 'green'); // Color code when data is available
       } else {
-        offlineStatus.unshift('grey'); // Insert grey color for days with no data
+        offlineStatus.unshift('grey'); // Grey for days with no data available
       }
     }
 
-    return offlineStatus; // Return the array in the correct order
+    return offlineStatus;
   };
 
   const daysToShow = 90; // Number of days to show bars for
@@ -85,20 +81,29 @@ export default component$(() => {
   return (
     <div class="container container-center">
       {endpoints.map((endpoint, index) => {
-        const pingData = allPingData.value?.[endpoint] || [];
+        const pingData = allPingData.value[endpoint];
         const barColors = calculateOfflineStatus(pingData, daysToShow);
 
         return (
           <div key={index} class={styles.section}>
             <p class={styles.heading}>{endpoint} Status</p>
-            <div class={styles.barContainer}>
-              {barColors.map((color, idx) => (
-                <div
-                  key={idx}
-                  class={styles.bar}
-                  style={{ backgroundColor: color === 'grey' ? '#ccc' : color }}
-                />
-              ))}
+            <div class={styles.wrapper}>
+              <div class={styles.barContainer}>
+                {barColors.map((color, idx) => (
+                  <div
+                    key={idx}
+                    class={styles.bar}
+                    style={{ backgroundColor: color === 'grey' ? '#ccc' : color }}
+                  />
+                ))}
+              </div>
+              <div class={styles.footnote}>
+                <p>90 days ago</p>
+                <div class={styles.line}></div>
+                <p>Status</p>
+                <div class={styles.line}></div>
+                <p>Today</p>
+              </div>
             </div>
           </div>
         );
