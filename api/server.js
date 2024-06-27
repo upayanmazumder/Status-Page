@@ -111,7 +111,7 @@ async function processWebsites() {
                         }
 
                         logInfo(`Retrieved data for ${website.shortName}`);
-                        resolve();
+                        resolve({ ...website, data: rows });
                     });
                 });
             });
@@ -121,22 +121,18 @@ async function processWebsites() {
     });
 
     try {
-        await Promise.all(promises);
-        logInfo('All websites processed successfully.');
+        return await Promise.all(promises);
     } catch (err) {
         logError('Error processing websites', err);
+        throw err;
     }
 }
 
 // Route handlers
 app.get('/', (req, res) => {
-    const availableRoutes = ['/'];
-
-    // Add routes for each website defined in websites.json
+    // Retrieve routes from websites.json
     const websites = require('./websites.json');
-    websites.forEach(website => {
-        availableRoutes.push(`/${website.shortName}`);
-    });
+    const availableRoutes = websites.map(website => `/${website.shortName}`);
 
     res.json({ availableRoutes });
 });
@@ -145,32 +141,48 @@ const websites = require('./websites.json');
 websites.forEach(website => {
     const { shortName } = website;
 
-    app.get(`/${shortName}`, (req, res) => {
+    app.get(`/${shortName}`, async (req, res) => {
         const db = getDatabaseConnection(shortName);
 
-        db.all(`
-            SELECT Timestamp, Status, Ping
-            FROM status
-            ORDER BY Timestamp DESC
-        `, (err, rows) => {
-            if (err) {
-                const errorMessage = `Failed to fetch data from database for ${shortName}`;
-                logError(errorMessage, err);
-                return res.status(500).json({ error: 'Failed to fetch data from database' });
-            }
+        try {
+            const rows = await new Promise((resolve, reject) => {
+                db.all(`
+                    SELECT Timestamp, Status, Ping
+                    FROM status
+                    ORDER BY Timestamp DESC
+                `, (err, rows) => {
+                    if (err) {
+                        const errorMessage = `Failed to fetch data from database for ${shortName}`;
+                        logError(errorMessage, err);
+                        reject(err);
+                        return res.status(500).json({ error: 'Failed to fetch data from database' });
+                    }
 
-            if (!rows || rows.length === 0) {
-                const warningMessage = `No data found for website ${shortName}`;
-                logWarning(warningMessage);
-                return res.status(404).json({ error: 'No data found for website' });
-            }
+                    if (!rows || rows.length === 0) {
+                        const warningMessage = `No data found for website ${shortName}`;
+                        logWarning(warningMessage);
+                        return res.status(404).json({ error: 'No data found for website' });
+                    }
 
-            const infoMessage = `Retrieved data for ${shortName}`;
-            logInfo(infoMessage);
-            res.json({ shortName, data: rows });
-        });
+                    const infoMessage = `Retrieved data for ${shortName}`;
+                    logInfo(infoMessage);
+                    resolve(rows);
+                });
+            });
+
+            // Return response with website details and status data
+            res.json({
+                shortName,
+                domain: website.domain,
+                longName: website.longName,
+                description: website.description,
+                data: rows
+            });
+        } catch (error) {
+            logError(`Failed to process ${shortName}`, error);
+            res.status(500).json({ error: `Failed to process ${shortName}` });
+        }
     });
-
 });
 
 // Start server and periodic website status check
