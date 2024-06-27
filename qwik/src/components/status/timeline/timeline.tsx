@@ -10,13 +10,42 @@ interface PingData {
   Ping: number;
 }
 
-// Define endpoints to fetch data from
-const endpoints = ['Google', 'Eraold', 'Github', 'Example'];
+// Fetch available routes from the API
+const fetchAvailableRoutes = async (): Promise<string[]> => {
+  try {
+    const response = await fetch(`https://${config.apidomain}/`, {
+      headers: { Accept: 'application/json' },
+    });
 
-// Fetch data for each endpoint
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const responseData = await response.json();
+    return responseData.availableRoutes as string[];
+  } catch (error) {
+    console.error('Error fetching available routes:', error);
+    return [];
+  }
+};
+
+// Route loader to fetch data for all available routes
+export const usePingData = routeLoader$(async () => {
+  const availableRoutes = await fetchAvailableRoutes();
+  const allPingData: Record<string, PingData[]> = {};
+
+  // Fetch data for each available route sequentially
+  for (const route of availableRoutes) {
+    const data = await fetchDataForEndpoint(route.toLowerCase());
+    allPingData[route] = data;
+  }
+
+  return allPingData;
+});
+
 const fetchDataForEndpoint = async (endpoint: string): Promise<PingData[]> => {
   try {
-    const response = await fetch(`https://${config.apidomain}/${endpoint.toLowerCase()}`, {
+    const response = await fetch(`https://${config.apidomain}${endpoint}`, {
       headers: { Accept: 'application/json' },
     });
 
@@ -32,22 +61,9 @@ const fetchDataForEndpoint = async (endpoint: string): Promise<PingData[]> => {
   }
 };
 
-// Route loader to fetch data for all endpoints
-export const usePingData = routeLoader$(async () => {
-  const allPingData: Record<string, PingData[]> = {};
-
-  // Fetch data for each endpoint sequentially
-  for (const endpoint of endpoints) {
-    const data = await fetchDataForEndpoint(endpoint.toLowerCase());
-    allPingData[endpoint] = data;
-  }
-
-  return allPingData;
-});
-
 export default component$(() => {
   const allPingData = usePingData();
-
+  
   // Function to calculate offline status and uptime percentage for each day
   const calculateOfflineStatus = (pingData: PingData[], days: number): { color: 'orange' | 'green' | 'grey'; date: string; offlineTimes: string[]; uptimePercentage: number }[] => {
     const offlineStatus: { color: 'orange' | 'green' | 'grey'; date: string; offlineTimes: string[]; uptimePercentage: number }[] = [];
@@ -127,13 +143,13 @@ export default component$(() => {
 
   return (
     <div class="container container-center">
-      {endpoints.map((endpoint, index) => {
+      {Object.keys(allPingData.value).map((endpoint, index) => {
         const pingData = allPingData.value[endpoint];
         const barData = calculateOfflineStatus(pingData, daysToShow);
 
         return (
           <div key={index} class={styles.section}>
-            <p class={styles.heading}>{endpoint} Status</p>
+            <p class={styles.heading}>{endpoint.slice(1).charAt(0).toUpperCase() + endpoint.slice(2)} Status</p>
             <div class={styles.wrapper}>
               <div class={styles.barContainer}>
                 {barData.map((bar, idx) => (
