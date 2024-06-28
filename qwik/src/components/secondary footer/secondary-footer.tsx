@@ -11,9 +11,9 @@ export default component$(() => {
     <div class={styles.secondaryFooter}>
       {/*KSP-C Section */}
       <div class={styles.column}>
-        <a class={styles.columnheading}>
+        <p class={styles.columnheading}>
         <BsBuilding /> Company
-        </a>
+        </p>
         <ul class={styles.columnlinks}>
           <li>
             <a
@@ -47,9 +47,9 @@ export default component$(() => {
 
       {/*Products Section */}
       <div class={styles.column}>
-        <a class={styles.columnheading}>
+        <p class={styles.columnheading}>
           <LuFolderKanban /> Products
-        </a>
+        </p>
         <ul class={styles.columnlinks}>
           <li>
             <a
@@ -72,9 +72,9 @@ export default component$(() => {
 
       {/*Resources Section */}
       <div class={styles.column}>
-        <a class={styles.columnheading}>
+        <p class={styles.columnheading}>
           <LuLayers /> Resources
-        </a>
+        </p>
         <ul class={styles.columnlinks}>
           <li>
             <a

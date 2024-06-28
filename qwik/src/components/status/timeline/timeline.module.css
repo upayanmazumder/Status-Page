@@ -6,12 +6,15 @@
   padding: 10px 15px 20px;
   height: fit-content;
   margin-bottom: 10px;
-  width: 100%;
+
 }
 
 .wrapper {
   text-align: center;
   vertical-align: middle;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
 }
 
 .heading {
@@ -45,6 +48,8 @@
   padding: 10px 30px;
   width: fit-content;
   max-width: 100%;
+  background-color: #14afd2;
+  margin: 0 auto;
 }
 
 .footnote {
@@ -80,6 +85,7 @@
   margin: 0 2px;
   width: 6px;
   position: relative;
+  min-width: 1px;
 }
 
 .bar::before {
@@ -103,14 +109,48 @@
   display: block;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1050px) {
   .bar {
     width: 3px;
   }
 }
 
-@media (min-width: 769px) and (max-width: 1024px) {
+@media (max-width: 870px) {
   .bar {
-    width: 4px;
+    width: 2.5px;
+    margin: 0 1.5px;
+  }
+}
+
+@media (max-width: 820px) {
+  .barContainer {
+    width: fit-content;
+    padding: 2px 10px;
+  }
+}
+
+@media (max-width: 680px) {
+
+  .barContainer {
+    width: fit-content;
+    padding: 0px 0px;
+  }
+
+  .bar {
+    width: 2px;
+  }
+
+  .line {
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 570px) {
+  .bar {
+    width: 1.5px;
+  }
+
+  .line {
+    min-width: 60px;
   }
 }

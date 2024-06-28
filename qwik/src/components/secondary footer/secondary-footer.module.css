@@ -1,5 +1,6 @@
 .secondaryFooter {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   background-color: #222;
   color: #fff;
@@ -12,6 +13,8 @@
   max-width: 15%;
   margin-left: 20px;
   margin-right: 20px;
+  text-align: center;
+  align-items: center;
 }
 
 .column:last-child {
@@ -44,4 +47,41 @@
 
 .columnlinks a:hover {
   color: #fff;
+}
+
+@media (max-width: 1050px) {
+  .secondaryFooter {
+    font-size: small;
+  }
+}
+
+@media (max-width: 950px) {
+  .secondaryFooter {
+    font-size: smaller;
+    padding: 20px 40px;
+  }
+  .columnheading {
+    font-size: small;
+  }
+}
+
+@media (max-width: 750px) {
+  .columnheading {
+    margin: 6px 0 10px;
+  }
+  .column:last-child {
+    flex-basis: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding-top: 20px;
+  }
+}
+
+@media (max-width: 650px) {
+  .secondaryFooter {
+    padding: 10px;
+  }
+  .column {
+    margin: 0 10px;
+  }
 }
