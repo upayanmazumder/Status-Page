@@ -126,7 +126,7 @@ export default component$(() => {
           }
           // If it's the last data point or the next data point is online, push the interval
           if (index === dataForDate.length - 1 || dataForDate[index + 1].Status === 'online') {
-            offlineIntervals.push(`${end}-${start}`);
+            offlineIntervals.push(start === end ? `${start}` : `${end}-${start}`);
             start = null;
             end = null;
           }
