@@ -209,11 +209,11 @@ processWebsites().then(() => {
     logError('Initial website status check failed', error);
 });
 
-// Periodic website status check (every minute)
+// Periodic website status check (every 15 minutes)
 setInterval(() => {
     processWebsites().then(() => {
         logInfo('Periodic website status check completed.');
     }).catch((error) => {
         logError('Periodic website status check failed', error);
     });
-}, 60000);
+}, 900000);
