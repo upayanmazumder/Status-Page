@@ -12,6 +12,12 @@
     "description": "The Kerbal Space Program Community Website"
   },
   {
+    "domain": "api.kspcommunity.com",
+    "shortName": "kspcapi",
+    "longName": "KSP Community API",
+    "description": "The Kerbal Space Program Community Website's API"
+  },
+  {
     "domain": "eranodes.com",
     "shortName": "eranodeslanding",
     "longName": "EraNodes Landing",
