@@ -17,6 +17,17 @@ interface EndpointDetails {
   description: string;
 }
 
+// Function to format UTC timestamp to IST
+const formatUTCToIST = (utcTimestamp: string): string => {
+  const utcDate = new Date(utcTimestamp);
+  
+  // Adjust timezone to IST (UTC+5:30)
+  const ISTOffset = 330; // in minutes
+  const ISTTime = new Date(utcDate.getTime() + (ISTOffset * 60000));
+  
+  return ISTTime.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: true });
+};
+
 // Fetch available routes from the API
 const fetchAvailableRoutes = async (): Promise<string[]> => {
   try {
@@ -113,11 +124,7 @@ export default component$(() => {
 
       dataForDate.forEach((data, index) => {
         if (data.Status !== 'online') {
-          const time = new Date(data.Timestamp).toLocaleTimeString(undefined, {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-          });
+          const time = formatUTCToIST(data.Timestamp); // Convert timestamp to IST
           if (start === null) {
             start = time;
             end = time;
@@ -126,7 +133,7 @@ export default component$(() => {
           }
           // If it's the last data point or the next data point is online, push the interval
           if (index === dataForDate.length - 1 || dataForDate[index + 1].Status === 'online') {
-            offlineIntervals.push(start === end ? `${start}` : `${end}-${start}`);
+            offlineIntervals.push(start === end ? `${start}` : `${end} - ${start}`);
             start = null;
             end = null;
           }
