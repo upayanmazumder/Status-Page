@@ -7,9 +7,7 @@ export default component$(() => {
     <div class={[styles.hero]}>
       <ImgThunder class={styles["hero-image"]} alt="Image thunder" />
       <h1>
-        <span class="highlight">Welcome</span> to our 
-        <br />
-        <span class="highlight">Status Page</span>
+        Upayan's <span class="highlight">Status Page</span>
       </h1>
       <p>Stay informed and updated with the latest information.</p>
     </div>
