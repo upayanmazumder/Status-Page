@@ -80,8 +80,8 @@ export default component$(() => {
   // Function to check if the endpoint is currently down
   const isEndpointDown = (Pingdata2: Pingdata2[]): boolean => {
     if (Pingdata2.length === 0) return true;
-    const lastPing = Pingdata2[Pingdata2.length - 1];
-    return lastPing.Status !== 'online';
+    const firstPing = Pingdata2[0];
+    return firstPing.Status !== 'online';
   };
 
   // Filter endpoints by status
