@@ -1,5 +1,5 @@
 /* eslint-disable qwik/loader-location */
-import { component$ } from '@builder.io/qwik';
+import { component$, useStore, useVisibleTask$ } from '@builder.io/qwik';
 import { routeLoader$ } from '@builder.io/qwik-city';
 import config from '../../../data/config.json';
 import styles from './timeline.module.css';
@@ -16,17 +16,6 @@ interface EndpointDetails {
   longName: string;
   description: string;
 }
-
-// Function to format UTC timestamp to IST
-const formatUTCToIST = (utcTimestamp: string): string => {
-  const utcDate = new Date(utcTimestamp);
-  
-  // Adjust timezone to IST (UTC+5:30)
-  const ISTOffset = 330; // in minutes
-  const ISTTime = new Date(utcDate.getTime() + (ISTOffset * 60000));
-  
-  return ISTTime.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: true });
-};
 
 // Fetch available routes from the API
 const fetchAvailableRoutes = async (): Promise<string[]> => {
@@ -87,9 +76,31 @@ export const usePingData = routeLoader$<Record<string, { pingData: PingData[], d
 
 export default component$(() => {
   const allData = usePingData();
-  
+
+  // State to store the local times
+  const state = useStore({
+    localTimes: {} as Record<string, string[]>,
+  });
+
+  useVisibleTask$(() => {
+    const updateLocalTimes = () => {
+      const newLocalTimes: Record<string, string[]> = {};
+
+      Object.keys(allData.value).forEach(endpoint => {
+        newLocalTimes[endpoint] = allData.value[endpoint].pingData.map(ping => {
+          const date = new Date(ping.Timestamp);
+          return date.toLocaleString();
+        });
+      });
+
+      state.localTimes = newLocalTimes;
+    };
+
+    updateLocalTimes();
+  });
+
   // Function to calculate offline status and uptime percentage for each day
-  const calculateOfflineStatus = (pingData: PingData[], days: number): { color: 'orange' | 'green' | 'grey'; date: string; offlineTimes: string[]; uptimePercentage: number }[] => {
+  const calculateOfflineStatus = (pingData: PingData[], localTimes: string[], days: number): { color: 'orange' | 'green' | 'grey'; date: string; offlineTimes: string[]; uptimePercentage: number }[] => {
     const offlineStatus: { color: 'orange' | 'green' | 'grey'; date: string; offlineTimes: string[]; uptimePercentage: number }[] = [];
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
@@ -124,7 +135,7 @@ export default component$(() => {
 
       dataForDate.forEach((data, index) => {
         if (data.Status !== 'online') {
-          const time = formatUTCToIST(data.Timestamp); // Convert timestamp to IST
+          const time = localTimes[index]; // Use the local time
           if (start === null) {
             start = time;
             end = time;
@@ -164,7 +175,8 @@ export default component$(() => {
     <div class="container container-center">
       {Object.keys(allData.value).map((endpoint, index) => {
         const { pingData, details } = allData.value[endpoint];
-        const barData = calculateOfflineStatus(pingData, daysToShow);
+        const localTimes = state.localTimes[endpoint] || [];
+        const barData = calculateOfflineStatus(pingData, localTimes, daysToShow);
 
         return (
           <div key={index} class={styles.section}>
