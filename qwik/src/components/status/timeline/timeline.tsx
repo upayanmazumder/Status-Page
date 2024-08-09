@@ -1,5 +1,5 @@
 /* eslint-disable qwik/loader-location */
-import { component$, useStore, useVisibleTask$ } from '@builder.io/qwik';
+import { component$, useStore, useTask$ } from '@builder.io/qwik';
 import { routeLoader$ } from '@builder.io/qwik-city';
 import config from '../../../data/config.json';
 import styles from './timeline.module.css';
@@ -82,7 +82,7 @@ export default component$(() => {
     localTimes: {} as Record<string, string[]>,
   });
 
-  useVisibleTask$(() => {
+  useTask$(() => {
     const updateLocalTimes = () => {
       const newLocalTimes: Record<string, string[]> = {};
 
@@ -175,7 +175,7 @@ export default component$(() => {
     <div class="container container-center">
       {Object.keys(allData.value).map((endpoint, index) => {
         const { pingData, details } = allData.value[endpoint];
-        const localTimes = state.localTimes[endpoint] || [];
+        const localTimes = state.localTimes[endpoint];
         const barData = calculateOfflineStatus(pingData, localTimes, daysToShow);
 
         return (
