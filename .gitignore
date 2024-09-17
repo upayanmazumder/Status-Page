@@ -1,4 +1,8 @@
-#Main
+# Main
 node_modules
 .vscode
 .env
+
+# Api
+api/logs
+api/databases
