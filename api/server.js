@@ -2,22 +2,62 @@ require('dotenv').config(); // Load environment variables from .env file
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
 const { logInfo, logWarning, logError } = require('./logger');
 
 const app = express();
 const PORT = process.env.PORT || 3000; // Use PORT from .env, fallback to 3000
-const dbDir = 'api/databases';
+const dbDir = path.join(__dirname, 'databases');
 const dbConnections = {};
+
+// Ensure the 'databases' folder exists
+if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+    logInfo(`Created 'databases' directory`);
+}
 
 // Function to get a database connection for a website
 function getDatabaseConnection(shortName) {
     const dbPath = path.join(dbDir, `${shortName}.db`);
     if (!dbConnections[shortName]) {
-        dbConnections[shortName] = new sqlite3.Database(dbPath);
-        logInfo(`Connected to database for ${shortName}`);
+        dbConnections[shortName] = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
+            if (err) {
+                logError(`Failed to connect to database for ${shortName}`, err);
+            } else {
+                logInfo(`Connected to database for ${shortName}`);
+            }
+        });
     }
     return dbConnections[shortName];
 }
+
+// Function to initialize a database (create schema if not exists)
+function initializeDatabase(shortName) {
+    const db = getDatabaseConnection(shortName);
+    db.serialize(() => {
+        db.run(`
+            CREATE TABLE IF NOT EXISTS status (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                Timestamp TEXT NOT NULL,
+                Status TEXT NOT NULL,
+                Ping INTEGER
+            )
+        `, (err) => {
+            if (err) {
+                logError(`Failed to create schema for ${shortName}`, err);
+            } else {
+                logInfo(`Schema initialized for ${shortName}`);
+            }
+        });
+    });
+}
+
+// Initialize databases for all websites on server start
+const websites = require('./websites.json');
+websites.forEach(website => {
+    const { shortName } = website;
+    initializeDatabase(shortName);
+});
 
 // Helper function to format the date as YYYY-MM-DD
 function formatDate(date) {
@@ -36,12 +76,10 @@ function getStartAndEndOfDay(date) {
 // Route handlers
 app.get('/', (req, res) => {
     // Retrieve routes from websites.json
-    const websites = require('./websites.json');
     const availableRoutes = websites.map(website => `/${website.shortName}`);
     res.json({ availableRoutes });
 });
 
-const websites = require('./websites.json');
 websites.forEach(website => {
     const { shortName } = website;
 
@@ -75,40 +113,49 @@ websites.forEach(website => {
                     });
                 });
 
-                // Analyze the fetched data to determine UP/DOWN status and downtime periods
-                let dayStatus = 'UP';
-                let downtimePeriods = [];
-                let currentDowntimeStart = null;
-
-                rows.forEach(row => {
-                    if (row.Status === 'offline') {
-                        if (!currentDowntimeStart) {
-                            currentDowntimeStart = new Date(row.Timestamp);
-                        }
-                    } else {
-                        if (currentDowntimeStart) {
-                            downtimePeriods.push({
-                                start: formatDate(currentDowntimeStart),
-                                end: formatDate(new Date(row.Timestamp))
-                            });
-                            currentDowntimeStart = null;
-                        }
-                    }
-                });
-
-                if (currentDowntimeStart) {
-                    downtimePeriods.push({
-                        start: formatDate(currentDowntimeStart),
-                        end: formatDate(endOfDay)
+                if (rows.length === 0) {
+                    // No data available for this day, set status to 0
+                    response.push({
+                        date: dateStr,
+                        status: 0,
+                        downtimePeriods: null
                     });
-                    dayStatus = 'DOWN';
-                }
+                } else {
+                    // Analyze the fetched data to determine UP/DOWN status and downtime periods
+                    let dayStatus = 'UP';
+                    let downtimePeriods = [];
+                    let currentDowntimeStart = null;
 
-                response.push({
-                    date: dateStr,
-                    status: dayStatus,
-                    downtimePeriods: downtimePeriods.length ? downtimePeriods : null
-                });
+                    rows.forEach(row => {
+                        if (row.Status === 'offline') {
+                            if (!currentDowntimeStart) {
+                                currentDowntimeStart = new Date(row.Timestamp);
+                            }
+                        } else {
+                            if (currentDowntimeStart) {
+                                downtimePeriods.push({
+                                    start: currentDowntimeStart.toISOString(),
+                                    end: new Date(row.Timestamp).toISOString()
+                                });
+                                currentDowntimeStart = null;
+                            }
+                        }
+                    });
+
+                    if (currentDowntimeStart) {
+                        downtimePeriods.push({
+                            start: currentDowntimeStart.toISOString(),
+                            end: endOfDay.toISOString()
+                        });
+                        dayStatus = 'DOWN';
+                    }
+
+                    response.push({
+                        date: dateStr,
+                        status: dayStatus,
+                        downtimePeriods: downtimePeriods.length ? downtimePeriods : null
+                    });
+                }
             }
 
             // Return response with website details and status data
