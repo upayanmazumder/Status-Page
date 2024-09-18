@@ -1,11 +1,11 @@
+require('dotenv').config(); // Load environment variables from .env file
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
-const fs = require('fs');
 const path = require('path');
 const { logInfo, logWarning, logError } = require('./logger');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000; // Use PORT from .env, fallback to 3000
 const dbDir = 'api/databases';
 const dbConnections = {};
 

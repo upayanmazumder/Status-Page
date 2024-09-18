@@ -24,5 +24,8 @@
   "bugs": {
     "url": "https://github.com/upayanmazumder/Status-Page/issues"
   },
-  "homepage": "https://github.com/upayanmazumder/Status-Page#readme"
+  "homepage": "https://github.com/upayanmazumder/Status-Page#readme",
+  "dependencies": {
+    "express": "^4.21.0"
+  }
 }
