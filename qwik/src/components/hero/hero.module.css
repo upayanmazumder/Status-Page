@@ -1,51 +1,43 @@
-/* hero.module.css */
-
 .hero {
-  position: relative;
   display: flex;
+  vertical-align: middle;
   flex-direction: column;
+  flex-wrap: nowrap;
   align-items: center;
+  height: 450px;
   justify-content: center;
-  padding: 80px 20px;
-  text-align: center;
-  color: #ffffff; /* White text color */
+  gap: 40px;
 }
 
 .hero-image {
+  width: 100%;
   position: absolute;
-  top: 0;
-  left: 50%; /* Center the image horizontally */
-  transform: translateX(-50%); /* Adjust to center using negative margin */
-  height: 100%;
-  width: fit-content;
+  height: auto;
+  object-fit: cover;
   z-index: -1;
-  opacity: 0.3; /* Subtle opacity for the background image */
-}
-
-.hero h1 {
-  font-size: 2.5rem; /* Large heading font size */
-  font-weight: 700; /* Bold font weight */
-  line-height: 1.2; /* Slightly increased line height */
-  margin-bottom: 20px; /* Space below heading */
+  opacity: 0.2;
+  pointer-events: none;
 }
 
 .hero p {
-  font-size: 1.2rem; /* Paragraph font size */
-  line-height: 1.5; /* Increased line height for better readability */
+  color: white;
+  margin: 0;
+  font-size: 1rem;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .hero h1 {
-    font-size: 2rem; /* Adjust heading size for smaller screens */
-  }
+.button-group {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
 }
 
-@media (max-width: 480px) {
+@media screen and (min-width: 768px) {
   .hero {
-    padding: 60px 10px; /* Adjust padding for smaller screens */
+    gap: 60px;
+    height: 500px;
   }
-  .hero h1 {
-    font-size: 1.8rem; /* Adjust heading size for smaller screens */
+
+  .hero p {
+    font-size: 1.3rem;
   }
 }
