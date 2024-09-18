@@ -4,10 +4,15 @@ import { routeLoader$ } from '@builder.io/qwik-city';
 import config from '../../../data/config.json';
 import styles from './timeline.module.css';
 
+interface DowntimePeriod {
+  start: string;
+  end: string;
+}
+
 interface PingData {
-  Timestamp: string;
-  Status: string;
-  Ping: number;
+  date: string;
+  status: 'UP' | 'DOWN';
+  downtimePeriods: DowntimePeriod[] | null;
 }
 
 interface EndpointDetails {
@@ -96,7 +101,7 @@ export default component$(() => {
 
     // Filter pingData to include only records within the last 'days' days
     const filteredPingData = pingData.filter(ping => {
-      const pingDate = new Date(ping.Timestamp);
+      const pingDate = new Date(ping.date);
       pingDate.setHours(0, 0, 0, 0);
       const differenceInDays = Math.ceil((currentDate.getTime() - pingDate.getTime()) / (1000 * 3600 * 24));
       return differenceInDays <= days;
@@ -107,7 +112,7 @@ export default component$(() => {
       date.setDate(date.getDate() - i);
 
       const dataForDate = filteredPingData.filter(ping => {
-        const pingDate = new Date(ping.Timestamp);
+        const pingDate = new Date(ping.date);
         pingDate.setHours(0, 0, 0, 0);
         return pingDate.getTime() === date.getTime();
       });
@@ -120,19 +125,19 @@ export default component$(() => {
 
       const offlineIntervals: string[] = [];
       let start: string | null = null;
-      let end = null;
+      let end: string | null = null;
 
       dataForDate.forEach((data, index) => {
-        if (data.Status !== 'online') {
-          const time = formatUTCToIST(data.Timestamp); // Convert timestamp to IST
+        if (data.status === 'DOWN') {
+          const time = formatUTCToIST(data.date); // Convert timestamp to IST
           if (start === null) {
             start = time;
             end = time;
           } else {
             end = time;
           }
-          // If it's the last data point or the next data point is online, push the interval
-          if (index === dataForDate.length - 1 || dataForDate[index + 1].Status === 'online') {
+          // If it's the last data point or the next data point is 'UP', push the interval
+          if (index === dataForDate.length - 1 || dataForDate[index + 1].status === 'UP') {
             offlineIntervals.push(start === end ? `${start}` : `${end} - ${start}`);
             start = null;
             end = null;
@@ -142,8 +147,8 @@ export default component$(() => {
 
       let uptimePercentage = 100;
       if (dataForDate.length > 0) {
-        const onlineCount = dataForDate.filter(ping => ping.Status === 'online').length;
-        uptimePercentage = Math.round((onlineCount / dataForDate.length) * 100);
+        const downCount = dataForDate.filter(ping => ping.status === 'DOWN').length;
+        uptimePercentage = Math.round(((dataForDate.length - downCount) / dataForDate.length) * 100);
       }
 
       if (offlineIntervals.length > 0) {

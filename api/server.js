@@ -1,4 +1,3 @@
-// Load environment variables from .env file
 require('dotenv').config(); 
 
 const express = require('express');
@@ -10,7 +9,7 @@ const schedule = require('node-schedule');
 const { logInfo, logWarning, logError } = require('./logger');
 
 const app = express();
-const PORT = process.env.PORT || 3000; // Use PORT from .env, fallback to 3000
+const PORT = process.env.PORT || 3000;
 const dbDir = path.join(__dirname, 'databases');
 const dbConnections = {};
 
@@ -63,6 +62,16 @@ websites.forEach(website => {
     initializeDatabase(shortName);
 });
 
+// Route to serve the contents of websites.json
+app.get('/', (req, res) => {
+    try {
+        res.json(websites);
+    } catch (error) {
+        logError('Failed to load websites.json', error);
+        res.status(500).json({ error: 'Failed to load websites.json' });
+    }
+});
+
 // Helper function to format the date as YYYY-MM-DD
 function formatDate(date) {
     return date.toISOString().split('T')[0];
@@ -76,7 +85,7 @@ async function pingWebsite(website) {
 
     try {
         const response = await axios.get(domain);
-        const pingTime = response.elapsedTime || 0; // Optional: track ping time if available
+        const pingTime = response.elapsedTime || 0;
         const status = response.status === 200 ? 'online' : 'offline';
 
         // Insert status into the database
