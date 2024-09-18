@@ -1,9 +1,11 @@
-require('dotenv').config(); 
+require('dotenv').config();
 
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
+const http = require('http');
 const axios = require('axios');
 const schedule = require('node-schedule');
 const { logInfo, logWarning, logError } = require('./logger');
@@ -224,7 +226,22 @@ websites.forEach(website => {
     });
 });
 
-// Start server
-app.listen(PORT, () => {
-    logInfo(`Server is running on port ${PORT}`);
-});
+// Determine whether to use HTTPS or HTTP
+const useHttps = fs.existsSync(path.join(__dirname, 'ssl/cert.pem')) && fs.existsSync(path.join(__dirname, 'ssl/key.pem'));
+
+if (useHttps) {
+    // HTTPS server setup
+    const sslOptions = {
+        cert: fs.readFileSync(path.join(__dirname, 'ssl/cert.pem')),
+        key: fs.readFileSync(path.join(__dirname, 'ssl/key.pem'))
+    };
+
+    https.createServer(sslOptions, app).listen(PORT, () => {
+        logInfo(`HTTPS server is running on port ${PORT}`);
+    });
+} else {
+    // HTTP server setup
+    http.createServer(app).listen(PORT, () => {
+        logInfo(`HTTP server is running on port ${PORT}`);
+    });
+}
