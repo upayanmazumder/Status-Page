@@ -26,8 +26,12 @@
   },
   "homepage": "https://github.com/upayanmazumder/Status-Page#readme",
   "dependencies": {
+    "axios": "^1.7.7",
+    "body-parser": "^1.20.3",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
-    "sqlite3": "^5.1.7"
+    "path": "^0.12.7",
+    "sqlite3": "^5.1.7",
+    "winston": "^3.14.2"
   }
 }
