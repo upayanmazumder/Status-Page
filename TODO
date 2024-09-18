@@ -3,8 +3,10 @@
 ## API
 
 - [ ] Do not make records in case of `AggregateError`
+- [ ] Simpler API, with backend handling most of the heavy work
 
 ## QWIK
 
 - [ ] Responsive layout for smaller devices
 - [ ] Implement loaders for sections
+- [ ] Update to work with new API

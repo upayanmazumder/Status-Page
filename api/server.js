@@ -1,41 +1,13 @@
 const express = require('express');
-const axios = require('axios');
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 const path = require('path');
 const { logInfo, logWarning, logError } = require('./logger');
 
-require('dotenv').config();
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 const dbDir = 'api/databases';
 const dbConnections = {};
-
-// Check if SSL certificates exist
-const useHttps = fs.existsSync('api/ssl/key.pem') && fs.existsSync('api/ssl/cert.pem');
-
-// Function to check website status
-async function checkWebsiteStatus(domain) {
-    try {
-        const startTime = Date.now();
-        const protocol = useHttps ? 'https' : 'http';
-        const response = await axios.get(`${protocol}://${domain}`, { timeout: 5000 });
-        const endTime = Date.now();
-        const ping = endTime - startTime;
-
-        if (response.status === 200) {
-            logInfo(`Website ${domain} is online with ping ${ping} ms.`);
-            return { status: 'online', ping };
-        } else {
-            logWarning(`Website ${domain} returned status ${response.status}.`);
-            return { status: 'offline', ping: null };
-        }
-    } catch (error) {
-        logError(`Website ${domain} is offline`, error);
-        return { status: 'offline', ping: null };
-    }
-}
 
 // Function to get a database connection for a website
 function getDatabaseConnection(shortName) {
@@ -47,85 +19,18 @@ function getDatabaseConnection(shortName) {
     return dbConnections[shortName];
 }
 
-// Ensure the databases directory exists
-try {
-    if (!fs.existsSync(dbDir)) {
-        fs.mkdirSync(dbDir, { recursive: true });
-        logInfo(`Created directory ${dbDir}.`);
-    }
-} catch (error) {
-    logError(`Failed to create directory ${dbDir}`, error);
-    process.exit(1);
+// Helper function to format the date as YYYY-MM-DD
+function formatDate(date) {
+    return date.toISOString().split('T')[0];
 }
 
-// Function to process each website
-async function processWebsites() {
-    const websites = require('./websites.json');
-    const promises = websites.map(async (website) => {
-        const db = getDatabaseConnection(website.shortName);
-
-        try {
-            await new Promise((resolve, reject) => {
-                db.serialize(async () => {
-                    db.run(`
-                        CREATE TABLE IF NOT EXISTS status (
-                            Timestamp TEXT,
-                            Status TEXT,
-                            Ping INTEGER
-                        )
-                    `, (err) => {
-                        if (err) {
-                            logError(`Failed to create table in database for ${website.shortName}`, err);
-                            reject(err);
-                            return;
-                        } else {
-                            logInfo(`Created table in database for ${website.shortName}.`);
-                        }
-                    });
-
-                    const { status, ping } = await checkWebsiteStatus(website.domain);
-                    const timestamp = new Date().toISOString();
-
-                    db.run(`
-                        INSERT INTO status (Timestamp, Status, Ping)
-                        VALUES (?, ?, ?)
-                    `, [timestamp, status, ping], (err) => {
-                        if (err) {
-                            logError(`Failed to insert status into database for ${website.shortName}`, err);
-                            reject(err);
-                            return;
-                        } else {
-                            logInfo(`Inserted status for ${website.domain} into database for ${website.shortName}.`);
-                        }
-                    });
-
-                    db.all(`
-                        SELECT Timestamp, Status, Ping
-                        FROM status
-                        ORDER BY Timestamp DESC
-                    `, (err, rows) => {
-                        if (err) {
-                            logError(`Failed to fetch data from database for ${website.shortName}`, err);
-                            reject(err);
-                            return;
-                        }
-
-                        logInfo(`Retrieved data for ${website.shortName}`);
-                        resolve({ ...website, data: rows });
-                    });
-                });
-            });
-        } catch (error) {
-            logError(`Failed to process ${website.shortName}`, error);
-        }
-    });
-
-    try {
-        return await Promise.all(promises);
-    } catch (err) {
-        logError('Error processing websites', err);
-        throw err;
-    }
+// Helper function to calculate the start and end of a given day
+function getStartAndEndOfDay(date) {
+    const startOfDay = new Date(date);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+    return { startOfDay, endOfDay };
 }
 
 // Route handlers
@@ -133,7 +38,6 @@ app.get('/', (req, res) => {
     // Retrieve routes from websites.json
     const websites = require('./websites.json');
     const availableRoutes = websites.map(website => `/${website.shortName}`);
-
     res.json({ availableRoutes });
 });
 
@@ -143,32 +47,69 @@ websites.forEach(website => {
 
     app.get(`/${shortName}`, async (req, res) => {
         const db = getDatabaseConnection(shortName);
+        const today = new Date();
+        let response = [];
 
         try {
-            const rows = await new Promise((resolve, reject) => {
-                db.all(`
-                    SELECT Timestamp, Status, Ping
-                    FROM status
-                    ORDER BY Timestamp DESC
-                `, (err, rows) => {
-                    if (err) {
-                        const errorMessage = `Failed to fetch data from database for ${shortName}`;
-                        logError(errorMessage, err);
-                        reject(err);
-                        return res.status(500).json({ error: 'Failed to fetch data from database' });
-                    }
+            // Get status data for the past 60 days
+            for (let i = 0; i < 60; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                const { startOfDay, endOfDay } = getStartAndEndOfDay(date);
+                const dateStr = formatDate(date);
 
-                    if (!rows || rows.length === 0) {
-                        const warningMessage = `No data found for website ${shortName}`;
-                        logWarning(warningMessage);
-                        return res.status(404).json({ error: 'No data found for website' });
-                    }
-
-                    const infoMessage = `Retrieved data for ${shortName}`;
-                    logInfo(infoMessage);
-                    resolve(rows);
+                // Fetch the status for this specific day
+                const rows = await new Promise((resolve, reject) => {
+                    db.all(`
+                        SELECT Timestamp, Status, Ping
+                        FROM status
+                        WHERE Timestamp BETWEEN ? AND ?
+                        ORDER BY Timestamp
+                    `, [startOfDay.toISOString(), endOfDay.toISOString()], (err, rows) => {
+                        if (err) {
+                            const errorMessage = `Failed to fetch data from database for ${shortName} on ${dateStr}`;
+                            logError(errorMessage, err);
+                            reject(err);
+                        }
+                        resolve(rows);
+                    });
                 });
-            });
+
+                // Analyze the fetched data to determine UP/DOWN status and downtime periods
+                let dayStatus = 'UP';
+                let downtimePeriods = [];
+                let currentDowntimeStart = null;
+
+                rows.forEach(row => {
+                    if (row.Status === 'offline') {
+                        if (!currentDowntimeStart) {
+                            currentDowntimeStart = new Date(row.Timestamp);
+                        }
+                    } else {
+                        if (currentDowntimeStart) {
+                            downtimePeriods.push({
+                                start: formatDate(currentDowntimeStart),
+                                end: formatDate(new Date(row.Timestamp))
+                            });
+                            currentDowntimeStart = null;
+                        }
+                    }
+                });
+
+                if (currentDowntimeStart) {
+                    downtimePeriods.push({
+                        start: formatDate(currentDowntimeStart),
+                        end: formatDate(endOfDay)
+                    });
+                    dayStatus = 'DOWN';
+                }
+
+                response.push({
+                    date: dateStr,
+                    status: dayStatus,
+                    downtimePeriods: downtimePeriods.length ? downtimePeriods : null
+                });
+            }
 
             // Return response with website details and status data
             res.json({
@@ -176,7 +117,7 @@ websites.forEach(website => {
                 domain: website.domain,
                 longName: website.longName,
                 description: website.description,
-                data: rows
+                data: response
             });
         } catch (error) {
             logError(`Failed to process ${shortName}`, error);
@@ -185,35 +126,7 @@ websites.forEach(website => {
     });
 });
 
-// Start server and periodic website status check
-if (useHttps) {
-    const https = require('https');
-    const privateKey = fs.readFileSync('api/ssl/key.pem', 'utf8');
-    const certificate = fs.readFileSync('api/ssl/cert.pem', 'utf8');
-    const credentials = { key: privateKey, cert: certificate };
-
-    const httpsServer = https.createServer(credentials, app);
-    httpsServer.listen(PORT, () => {
-        logInfo(`Server is running on HTTPS port ${PORT}`);
-    });
-} else {
-    app.listen(PORT, () => {
-        logInfo(`Server is running on HTTP port ${PORT}`);
-    });
-}
-
-// Initial website status check
-processWebsites().then(() => {
-    logInfo('Initial website status check completed.');
-}).catch((error) => {
-    logError('Initial website status check failed', error);
+// Start server
+app.listen(PORT, () => {
+    logInfo(`Server is running on port ${PORT}`);
 });
-
-// Periodic website status check (every 15 minutes)
-setInterval(() => {
-    processWebsites().then(() => {
-        logInfo('Periodic website status check completed.');
-    }).catch((error) => {
-        logError('Periodic website status check failed', error);
-    });
-}, 900000);
