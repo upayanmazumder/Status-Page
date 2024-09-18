@@ -1,8 +1,12 @@
-require('dotenv').config(); // Load environment variables from .env file
+// Load environment variables from .env file
+require('dotenv').config(); 
+
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
+const axios = require('axios');
+const schedule = require('node-schedule');
 const { logInfo, logWarning, logError } = require('./logger');
 
 const app = express();
@@ -64,6 +68,50 @@ function formatDate(date) {
     return date.toISOString().split('T')[0];
 }
 
+// Function to ping a website and log its status
+async function pingWebsite(website) {
+    const { shortName, domain } = website;
+    const db = getDatabaseConnection(shortName);
+    const timestamp = new Date().toISOString();
+
+    try {
+        const response = await axios.get(domain);
+        const pingTime = response.elapsedTime || 0; // Optional: track ping time if available
+        const status = response.status === 200 ? 'online' : 'offline';
+
+        // Insert status into the database
+        db.run(`
+            INSERT INTO status (Timestamp, Status, Ping)
+            VALUES (?, ?, ?)
+        `, [timestamp, status, pingTime], (err) => {
+            if (err) {
+                logError(`Failed to insert status for ${shortName}`, err);
+            } else {
+                logInfo(`Logged status for ${shortName}: ${status}`);
+            }
+        });
+    } catch (error) {
+        db.run(`
+            INSERT INTO status (Timestamp, Status, Ping)
+            VALUES (?, ?, ?)
+        `, [timestamp, 'offline', 0], (err) => {
+            if (err) {
+                logError(`Failed to log offline status for ${shortName}`, err);
+            } else {
+                logWarning(`Website ${shortName} is offline`);
+            }
+        });
+    }
+}
+
+// Schedule ping checks every 5 minutes
+schedule.scheduleJob('*/5 * * * *', () => {
+    websites.forEach(website => {
+        pingWebsite(website);
+    });
+    logInfo('Scheduled ping check executed');
+});
+
 // Helper function to calculate the start and end of a given day
 function getStartAndEndOfDay(date) {
     const startOfDay = new Date(date);
@@ -73,13 +121,7 @@ function getStartAndEndOfDay(date) {
     return { startOfDay, endOfDay };
 }
 
-// Route handlers
-app.get('/', (req, res) => {
-    // Retrieve routes from websites.json
-    const availableRoutes = websites.map(website => `/${website.shortName}`);
-    res.json({ availableRoutes });
-});
-
+// Route to list all websites and their status for the past 60 days
 websites.forEach(website => {
     const { shortName } = website;
 
