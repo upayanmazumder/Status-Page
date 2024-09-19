@@ -1,25 +1,30 @@
 import { component$ } from "@builder.io/qwik";
-import QwikLogo from "../../media/icon.png?jsx";
-import { BsGithub, BsCodeSlash } from "@qwikest/icons/bootstrap";
-import config from '../../data/config.json';
+import logo from "../../media/logo.png";
 import styles from "./header.module.css";
+import config from "../../data/config.json";
 
 export default component$(() => {
-  const apiLink = `https://${config.apidomain}`;
+  const { headerLinks, header, companyDetails } = config;
+
   return (
     <header class={styles.header}>
-      <div class={styles.logo}>
-        <QwikLogo />
+      <div class={["container", styles.wrapper]}>
+        <a href={companyDetails.website} title={companyDetails.companyName} target="_blank">
+          <div class={styles.branding}>
+            <div class={styles.logo}><img src={logo} height={100} width={100} alt="Logo"></img></div>
+            <h2 class={styles.title}>{header.title}</h2>
+          </div>
+        </a>
+        <ul>
+          {Object.entries(headerLinks).map(([name, url]) => (
+            <li key={name}>
+              <a href={url} target="_blank">
+                {name}
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
-      <h1><a href="https://upayan.space" target="_blank">Status Page</a></h1>
-      <ul>
-        <li>
-          <a href="https://github.com/upayanmazumder/Status-Page" target="_blank"><BsGithub/> Repository</a>
-        </li>
-        <li>
-          <a href={apiLink} target="_blank"><BsCodeSlash/> Api</a>
-        </li>
-      </ul>
     </header>
   );
 });

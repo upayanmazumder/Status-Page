@@ -1,25 +1,22 @@
-import { component$ } from '@builder.io/qwik';
-import type { DocumentHead } from '@builder.io/qwik-city';
-import Timeline, { usePingData } from '../components/status/timeline/timeline';
+import { component$ } from "@builder.io/qwik";
+import type { DocumentHead } from "@builder.io/qwik-city";
+
 import Hero from "../components/hero/hero";
+
 export default component$(() => {
   return (
     <>
-      <div role="presentation" class="ellipsis"></div>
-      <Hero/>
-      <Timeline />
+      <Hero />
     </>
   );
 });
 
 export const head: DocumentHead = {
-  title: 'Status Page',
+  title: "Status Page",
   meta: [
     {
-      name: 'description',
-      content: 'Welcome to the status page',
+      name: "description",
+      content: "Monitor the status of our websites!",
     },
   ],
 };
-
-export { usePingData };

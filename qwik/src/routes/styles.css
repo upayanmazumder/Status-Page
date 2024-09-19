@@ -98,6 +98,9 @@ ul {
 .container.container-center {
   text-align: center;
 }
+.container.container-flex {
+  /* does nothing on mobile */
+}
 .container.container-spacing-xl {
   padding: 50px 40px;
 }
@@ -169,17 +172,6 @@ button.button-small {
   background: radial-gradient(
     50% 50% at 50% 50%,
     rgba(172, 127, 244, 0.5) 0%,
-    rgba(21, 25, 52, 0) 100%
-  );
-  transform: rotate(-5deg);
-}
-.ellipsis.ellipsis-404 {
-  top: 80px;
-  left: 40px;
-  height: 500px;
-  background: radial-gradient(
-    50% 50% at 50% 50%,
-    #941c32,
     rgba(21, 25, 52, 0) 100%
   );
   transform: rotate(-5deg);

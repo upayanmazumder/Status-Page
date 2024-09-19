@@ -1,21 +1,19 @@
-/* eslint-disable qwik/jsx-a */
-import { component$, useStore } from "@builder.io/qwik";
+import { component$ } from "@builder.io/qwik";
+import { useServerTimeLoader } from "../../routes/layout";
 import styles from "./footer.module.css";
-import packageJson from '../../../../package.json';
 
-export const Footer = component$(() => {
-  const store = useStore({ version: packageJson.version });
+export default component$(() => {
+  const serverTime = useServerTimeLoader();
 
   return (
-    <footer class={styles.footer}>
-      <p class={styles.anchor}>
-        <span>&copy; {new Date().getFullYear()} Upayan. All rights reserved</span>
-      </p>
-      <p class={styles.version}>
-        Version {store.version}
-      </p>
+    <footer>
+      <div class="container">
+        <a href="https://upayan.space/" target="_blank" class={styles.anchor}>
+          <span>Made with ♡ by Upayan</span>
+          <span class={styles.spacer}>|</span>
+          <span>{serverTime.value.date}</span>
+        </a>
+      </div>
     </footer>
   );
 });
-
-export default Footer;

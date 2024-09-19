@@ -3,9 +3,8 @@ import { routeLoader$ } from "@builder.io/qwik-city";
 import type { RequestHandler } from "@builder.io/qwik-city";
 
 import Header from "../components/header/header";
-import { usePingdata2 } from '../components/status/announce/announce';
-import StatusAnnouncer from "../components/status/announce/announce";
-import SecondaryFooter from "../components/secondary footer/secondary-footer";
+import API from "../components/api/api";
+import SecondaryFooter from "../components/secondary-footer/secondary-footer";
 import Footer from "../components/footer/footer";
 
 import styles from "./styles.css?inline";
@@ -32,7 +31,7 @@ export default component$(() => {
   return (
     <>
       <Header />
-      <StatusAnnouncer />
+      <API />
       <main>
         <Slot />
       </main>
@@ -41,5 +40,3 @@ export default component$(() => {
     </>
   );
 });
-
-export { usePingdata2 };
