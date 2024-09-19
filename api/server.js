@@ -136,7 +136,7 @@ function getStartAndEndOfDay(date) {
 websites.forEach(website => {
     const { shortName } = website;
 
-    app.get(`/${shortName}`, async (req, res) => {
+    app.get(`/sites/${shortName}`, async (req, res) => {
         const db = getDatabaseConnection(shortName);
         const today = new Date();
         let response = [];
