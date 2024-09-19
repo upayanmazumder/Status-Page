@@ -1,9 +1,11 @@
 import { component$, useSignal, useTask$, $ } from "@builder.io/qwik";
 import apiStyles from "./api.module.css";
+import config from "../../data//config.json"
 
 export default component$(() => {
   const apiStatus = useSignal<'loading' | 'online' | 'offline'>('loading');
   const isVisible = useSignal(false); // Start with false to not show the notification initially
+  const {domain} = config.api;
 
   // Convert fetchWithTimeout to a QRL function using $
   const fetchWithTimeout = $((url: string, timeout: number) => {
@@ -16,7 +18,7 @@ export default component$(() => {
   // Make the API request with a timeout of 5 seconds
   useTask$(async () => {
     try {
-      const response = await fetchWithTimeout("https://status-page-api.upayan.space/", 5000);
+      const response = await fetchWithTimeout(`https://${domain}/`, 5000);
       if (response instanceof Response && response.ok) {
         apiStatus.value = 'online';
         isVisible.value = false; // Hide notification if online

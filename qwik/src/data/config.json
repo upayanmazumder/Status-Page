@@ -20,6 +20,9 @@
         "Docs": "https://github.com/upayanmazumder/Status-Page",
         "Support Me": "https://www.paypal.com/paypalme/upayanmazumder"
     },
+    "api": {
+        "domain": "status-page-api.upayan.space"
+    },
     "socialMediaHandles": {
         "instagram": "https://www.instagram.com/_._upayan_._/",
         "youtube": "",
