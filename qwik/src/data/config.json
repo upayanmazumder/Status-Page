@@ -12,6 +12,14 @@
         },
         "website": "www.upayan.space"
     },
+    "header": {
+        "title": "Upayan Status Page"
+    },
+    "headerLinks": {
+        "Repository": "https://github.com/upayanmazumder/Status-Page",
+        "Docs": "https://github.com/upayanmazumder/Status-Page",
+        "Support Me": "https://www.paypal.com/paypalme/upayanmazumder"
+    },
     "socialMediaHandles": {
         "instagram": "https://www.instagram.com/_._upayan_._/",
         "youtube": "",
