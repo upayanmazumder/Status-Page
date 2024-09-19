@@ -3,6 +3,7 @@ import { routeLoader$ } from "@builder.io/qwik-city";
 import type { RequestHandler } from "@builder.io/qwik-city";
 
 import Header from "../components/header/header";
+import API from "../components/api/api";
 import SecondaryFooter from "../components/secondary-footer/secondary-footer";
 import Footer from "../components/footer/footer";
 
@@ -30,6 +31,7 @@ export default component$(() => {
   return (
     <>
       <Header />
+      <API />
       <main>
         <Slot />
       </main>
