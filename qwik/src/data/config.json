@@ -1,0 +1,24 @@
+{
+    "companyDetails": {
+        "companyName": "Upayan",
+        "email": "support@upayan.space",
+        "phoneNumber": "+1-234-567-890",
+        "address": {
+            "street": "123 Business Road",
+            "city": "Business City",
+            "state": "Business State",
+            "zipCode": "12345",
+            "country": "Country"
+        },
+        "website": "www.upayan.space"
+    },
+    "socialMediaHandles": {
+        "instagram": "https://www.instagram.com/_._upayan_._/",
+        "youtube": "",
+        "twitter": "",
+        "linkedin": "https://www.linkedin.com/in/upayanmazumder/",
+        "github": "https://github.com/upayanmazumder/",
+        "facebook": "https://www.facebook.com/upayan.mazumder/"
+    }
+  }
+  
