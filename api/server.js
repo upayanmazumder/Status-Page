@@ -4,9 +4,8 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
-const https = require('https');
 const http = require('http');
-const axios = require('axios');
+const cloudscraper = require('cloudscraper');
 const schedule = require('node-schedule');
 const { logInfo, logWarning, logError } = require('./logger');
 
@@ -85,16 +84,22 @@ async function pingWebsite(website) {
     const db = getDatabaseConnection(shortName);
     const timestamp = new Date().toISOString();
 
+    const options = {
+        uri: `https://${domain}`,
+        method: 'GET',
+        resolveWithFullResponse: true,
+        timeout: 10000, // Increased timeout to handle potential delays with Cloudflare
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; MonitoringBot/1.0; +https://yourdomain.com/bot)'
+        }
+    };
+
     try {
-        const response = await axios.get(domain, {
-            maxRedirects: 5,  // Allow up to 5 redirects
-            timeout: 5000,    // Set a timeout of 5 seconds
-            validateStatus: (status) => {
-                return status >= 200 && status < 400; // Accept all 2xx and 3xx responses
-            }
-        });
-        const pingTime = response.elapsedTime || 0;
-        const status = response.status === 200 ? 'online' : 'offline';
+        const startTime = Date.now();
+        const response = await cloudscraper(options);
+        const pingTime = Date.now() - startTime;
+        const statusCode = response.statusCode;
+        const status = (statusCode >= 200 && statusCode < 400) ? 'online' : 'offline';
 
         // Insert status into the database
         db.run(`
@@ -232,22 +237,7 @@ websites.forEach(website => {
     });
 });
 
-// Determine whether to use HTTPS or HTTP
-const useHttps = fs.existsSync(path.join(__dirname, 'ssl/cert.pem')) && fs.existsSync(path.join(__dirname, 'ssl/key.pem'));
-
-if (useHttps) {
-    // HTTPS server setup
-    const sslOptions = {
-        cert: fs.readFileSync(path.join(__dirname, 'ssl/cert.pem')),
-        key: fs.readFileSync(path.join(__dirname, 'ssl/key.pem'))
-    };
-
-    https.createServer(sslOptions, app).listen(PORT, () => {
-        logInfo(`HTTPS server is running on port ${PORT}`);
-    });
-} else {
-    // HTTP server setup
-    http.createServer(app).listen(PORT, () => {
-        logInfo(`HTTP server is running on port ${PORT}`);
-    });
-}
+// HTTP server setup
+http.createServer(app).listen(PORT, () => {
+    logInfo(`HTTP server is running on port ${PORT}`);
+});
