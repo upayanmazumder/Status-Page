@@ -1,6 +1,6 @@
 import { component$, useSignal, useTask$, $ } from "@builder.io/qwik";
 import apiStyles from "./api.module.css";
-import config from "../../data//config.json"
+import config from "../../data/config.json"
 
 export default component$(() => {
   const apiStatus = useSignal<'loading' | 'online' | 'offline'>('loading');
