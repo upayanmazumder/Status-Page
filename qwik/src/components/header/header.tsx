@@ -9,7 +9,7 @@ export default component$(() => {
   return (
     <header class={styles.header}>
       <div class={["container", styles.wrapper]}>
-        <a href={companyDetails.website} title={companyDetails.companyName} target="_blank">
+        <a href={`https://${companyDetails.website}`} title={companyDetails.companyName} target="_blank">
           <div class={styles.branding}>
             <div class={styles.logo}><img src={logo} height={100} width={100} alt="Logo"></img></div>
             <h2 class={styles.title}>{header.title}</h2>

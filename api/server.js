@@ -86,7 +86,13 @@ async function pingWebsite(website) {
     const timestamp = new Date().toISOString();
 
     try {
-        const response = await axios.get(domain);
+        const response = await axios.get(domain, {
+            maxRedirects: 5,  // Allow up to 5 redirects
+            timeout: 5000,    // Set a timeout of 5 seconds
+            validateStatus: (status) => {
+                return status >= 200 && status < 400; // Accept all 2xx and 3xx responses
+            }
+        });
         const pingTime = response.elapsedTime || 0;
         const status = response.status === 200 ? 'online' : 'offline';
 
