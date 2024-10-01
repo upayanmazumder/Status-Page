@@ -37,7 +37,7 @@ export default component$(() => {
             </a>
           </li>
           <li>
-            <a href={companyDetails.website} target="_blank" rel="noopener noreferrer" class={secFooterStyles.website}>
+            <a href={`https://${companyDetails.website}`} target="_blank" rel="noopener noreferrer" class={secFooterStyles.website}>
               {companyDetails.website}
             </a>
           </li>
@@ -47,7 +47,7 @@ export default component$(() => {
         <div class={secFooterStyles.boxSupport}>
           <p class={secFooterStyles.title}>Support</p>
           <div class={secFooterStyles.emailWrapper}>
-            <p>Reach out to: 
+            <p>
               <a href={`mailto:${companyDetails.email}`} class={secFooterStyles.email}>
                 {companyDetails.email}
               </a>
