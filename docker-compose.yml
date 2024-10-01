@@ -1,5 +1,5 @@
 services:
   backend:
-    image: upayanmazumder/Status-Page:latest
+    image: upayanmazumder/status-page:latest
     ports:
       - 3200:3200
