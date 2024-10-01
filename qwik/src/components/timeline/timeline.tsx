@@ -1,4 +1,5 @@
 import { component$, useTask$, useStore } from '@builder.io/qwik';
+import styles from './timeline.module.css';
 
 interface WebsiteStatus {
   domain: string;
@@ -59,34 +60,27 @@ export default component$(() => {
   });
 
   return (
-    <div>
-      <h1>Website Status</h1>
+    <div class={styles.container}>
+      <h1 class={styles.heading}>Website Status</h1>
       {state.error ? (
-        <p>{state.error}</p>
+        <p class={styles.error}>{state.error}</p>
       ) : (
-        <ul>
+        <ul class={styles['site-list']}>
           {state.websites.map((site) => (
-            <li key={site.domain}>
-              <h2>{site.longName}</h2>
-              <p>{site.description}</p>
+            <li key={site.domain} class={styles['site-item']}>
+              <h2 class={styles['site-name']}>{site.longName}</h2>
+              <p class={styles['site-description']}>{site.description}</p>
               <p>
-                <strong>Domain:</strong> {site.domain}
+                {site.domain}
               </p>
-              <div class="status-bars">
+              <div class={styles['status-bars']}>
                 {site.data ? (
                   site.data.map((statusEntry, index) => {
                     const barColor = getBarColor(statusEntry);
                     return (
                       <div
                         key={index}
-                        class="status-bar"
-                        style={{
-                          backgroundColor: barColor,
-                          height: '20px',
-                          width: '15px',
-                          display: 'inline-block',
-                          margin: '0 2px',
-                        }}
+                        class={`${styles['status-bar']} ${barColor}`}
                         title={`Date: ${statusEntry.date}, Status: ${
                           statusEntry.status === 0 ? 'UP' : 'DOWN'
                         }`}
@@ -110,7 +104,7 @@ export default component$(() => {
     downtimePeriods: { start: string; end: string }[] | null;
   }): string {
     if (statusEntry.status === 0) {
-      return 'green'; // UP
+      return styles.green; // UP
     } else if (statusEntry.status === 'DOWN') {
       if (statusEntry.downtimePeriods && statusEntry.downtimePeriods.length > 0) {
         const fullDay = statusEntry.downtimePeriods.every(
@@ -120,9 +114,9 @@ export default component$(() => {
             new Date(period.end).getMinutes() === 59 &&
             new Date(period.end).getSeconds() === 59
         );
-        return fullDay ? 'red' : 'orange'; // Full-day DOWN vs Partial DOWN
+        return fullDay ? styles.red : styles.orange; // Full-day DOWN vs Partial DOWN
       }
     }
-    return 'gray'; // No data or unknown status
+    return styles.gray; // No data or unknown status
   }
 });
