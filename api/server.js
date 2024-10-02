@@ -14,6 +14,9 @@ const PORT = process.env.PORT || 3000;
 const dbDir = path.join(__dirname, 'databases');
 const dbConnections = {};
 
+// Increase the max listeners limit to avoid EventEmitter memory leak warnings
+require('events').EventEmitter.defaultMaxListeners = 20;
+
 // Ensure the 'databases' folder exists
 if (!fs.existsSync(dbDir)) {
     fs.mkdirSync(dbDir, { recursive: true });
@@ -88,9 +91,14 @@ async function pingWebsite(website) {
         uri: `https://${domain}`,
         method: 'GET',
         resolveWithFullResponse: true,
-        timeout: 10000, // Increased timeout to handle potential delays with Cloudflare
+        timeout: 15000, // Increased timeout to handle potential delays with Cloudflare
         headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible; MonitoringBot/1.0; +https://yourdomain.com/bot)'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'en-US,en;q=0.8',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
         }
     };
 
@@ -113,6 +121,7 @@ async function pingWebsite(website) {
             }
         });
     } catch (error) {
+        // Mark as offline if the request fails
         db.run(`
             INSERT INTO status (Timestamp, Status, Ping)
             VALUES (?, ?, ?)
