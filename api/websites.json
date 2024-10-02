@@ -10,29 +10,5 @@
     "shortName": "kspcmain",
     "longName": "KSP Community",
     "description": "The Kerbal Space Program Community Website"
-  },
-  {
-    "domain": "api.kspcommunity.com",
-    "shortName": "kspcapi",
-    "longName": "KSP Community API",
-    "description": "The Kerbal Space Program Community Website's API"
-  },
-  {
-    "domain": "eranodes.com",
-    "shortName": "eranodeslanding",
-    "longName": "EraNodes Landing",
-    "description": "The landing page of EraNodes"
-  },
-  {
-    "domain": "dash.eranodes.com",
-    "shortName": "eranodesdashboard",
-    "longName": "EraNodes Dashboard",
-    "description": "The dashboard of EraNodes"
-  },
-  {
-    "domain": "panel.eranodes.com",
-    "shortName": "eranodespanel",
-    "longName": "EraNodes Panel",
-    "description": "The panel of EraNodes"
   }
 ]
