@@ -1,5 +1,5 @@
 services:
   backend:
-    image: upayanmazumder/status-page:latest
+    image: ghcr.io/upayanmazumder/status-page:latest
     ports:
       - 3200:3000
