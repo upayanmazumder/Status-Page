@@ -19,7 +19,7 @@ ARG NODE_ENV
 ENV NODE_ENV=${NODE_ENV}
 
 # Bind to the specified ports
-EXPOSE 3200
+EXPOSE 3000
 
 # Command to run the app
 CMD ["node", "api/server.js"]
