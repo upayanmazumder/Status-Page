@@ -1,10 +1,7 @@
 # TODO
 
 ## API
-
-- [ ] Do not make records in case of `AggregateError`
-- [ ] Simpler API, with backend handling most of the heavy work
-- [ ] Fix ```qwik\src\data\config.json``` to use proper domain
+-[ ] Working API
 
 ## QWIK
 
