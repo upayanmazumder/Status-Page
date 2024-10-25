@@ -1,25 +1,25 @@
-# Use the official Node.js image
-FROM node:20
+# Use the official Python image
+FROM python:3.9
 
 # Create app directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Copy package.json and package-lock.json if available from the project root
-COPY package*.json ./
+# Copy requirements.txt if available from the project root
+COPY ./api/requirements.txt ./
 
 # Install app dependencies
-RUN npm install --production
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the entire project directory contents to the app directory
 COPY . .
 
 # Define build argument
-ARG NODE_ENV
+ARG PYTHON_ENV
 # Set environment variable
-ENV NODE_ENV=${NODE_ENV}
+ENV PYTHON_ENV=${PYTHON_ENV}
 
 # Bind to the specified ports
 EXPOSE 3000
 
 # Command to run the app
-CMD ["node", "api/server.js"]
+CMD ["python", "api/server.py"]
