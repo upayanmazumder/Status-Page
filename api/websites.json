@@ -1,14 +1,14 @@
 [
-  {
-    "domain": "upayan.space",
-    "shortName": "upayan",
-    "longName": "Upayan",
-    "description": "Upayan's Portfolio website"
-  },
-  {
-    "domain": "kspcommunity.com",
-    "shortName": "kspcmain",
-    "longName": "KSP Community",
-    "description": "The Kerbal Space Program Community Website"
-  }
-]
+    {
+      "domain": "upayan.space",
+      "shortName": "upayan",
+      "longName": "Upayan",
+      "description": "Upayan's Portfolio website"
+    },
+    {
+      "domain": "kspcommunity.com",
+      "shortName": "kspcmain",
+      "longName": "KSP Community",
+      "description": "The Kerbal Space Program Community Website"
+    }
+  ]
